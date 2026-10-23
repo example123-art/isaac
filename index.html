@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Isaac C Olegario's IT Portfolio" />
+  <title>Isaac C Olegario | IT Portfolio</title>
+
+  <style>
+    /* ================= LIGHT PINK THEME ================= */
+    :root {
+      --bg: #fff5f8; 
+      --surface: #ffffff; 
+      --text: #2d2628;
+      --muted: #7a6b70;
+      --accent: #ff4d94; /* Vibrant Pink */
+      --accent-dim: rgba(255, 77, 148, 0.15);
+      --border: rgba(255, 77, 148, 0.3);
+      --shadow: 0 10px 30px rgba(255, 77, 148, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Canvas for Network Background */
+    #network-canvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1; pointer-events: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    
+    .wrap { width: min(1200px, calc(100% - 40px)); margin: auto; }
+    .wrap-narrow { width: min(1000px, calc(100% - 40px)); margin: auto; }
+
+    /* ================= SCROLL ANIMATIONS ================= */
+    .hidden-el { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+    .show-el { opacity: 1; transform: translateY(0); }
+
+    /* ================= HEADER ================= */
+    header {
+      position: fixed; width: 100%; top: 0; z-index: 10;
+      background: rgba(255, 245, 248, 0.85); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav { height: 75px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-weight: 900; font-size: 1.2rem; letter-spacing: 3px; color: var(--text); }
+    .brand span { color: var(--accent); }
+    .navlinks { display: flex; gap: 30px; }
+    .navlinks a { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); transition: all 0.3s; }
+    .navlinks a:hover { color: var(--accent); }
+
+    /* ================= HERO (SPLIT LAYOUT) ================= */
+    .hero { 
+      min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; 
+      gap: 60px; align-items: center; padding-top: 75px;
+    }
+    
+    .eyebrow { color: var(--accent); font-size: 0.85rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; }
+    h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 20px; font-weight: 900; color: var(--text); }
+    .hero p { color: var(--muted); font-size: 1.1rem; margin-bottom: 30px; }
+    
+    .actions { display: flex; gap: 15px; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 14px 28px; border-radius: 8px; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; border: 1px solid var(--border); }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 5px 15px var(--accent-dim); }
+    .btn.primary:hover { box-shadow: 0 10px 25px var(--accent-dim); transform: translateY(-3px); }
+    .btn.secondary { background: #fff; color: var(--text); }
+    .btn.secondary:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-3px); }
+
+    /* ================= 3D PRISM PFP ================= */
+    .prism-container {
+      position: relative; width: 320px; height: 360px; margin: 0 auto;
+      display: flex; justify-content: center; align-items: center;
+    }
+
+    /* The glowing aura behind the picture */
+    .prism-aura {
+      position: absolute; width: 100%; height: 100%;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      opacity: 0.3; filter: blur(30px); z-index: 1;
+      animation: pulseAura 4s infinite alternate;
+    }
+
+    @keyframes pulseAura {
+      0% { transform: scale(0.9); opacity: 0.2; }
+      100% { transform: scale(1.1); opacity: 0.4; }
+    }
+
+    /* The diamond shape (rotated square) */
+    .prism-photo {
+      position: relative; width: 260px; height: 260px;
+      background: #fff; padding: 10px; z-index: 2;
+      border: 2px solid var(--accent); border-radius: 20px;
+      transform: rotate(45deg); /* The Prism effect */
+      overflow: hidden; box-shadow: 0 15px 35px var(--accent-dim);
+      transition: transform 0.4s ease;
+    }
+
+    .prism-photo:hover {
+      transform: rotate(0deg) scale(1.05); /* Straightens out on hover */
+    }
+
+    /* Counter-rotate the image so the face is straight */
+    .prism-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: 12px; transform: rotate(-45deg) scale(1.4);
+      transition: transform 0.4s ease;
+    }
+
+    .prism-photo:hover img {
+      transform: rotate(0deg) scale(1);
+    }
+
+    /* ================= TECH CARDS ================= */
+    section { padding: 100px 0; }
+    .section-head { margin-bottom: 50px; text-align: center; }
+    .section-head h2 { font-size: 2.5rem; color: var(--text); font-weight: 900; }
+    .section-head p { color: var(--muted); margin-top: 10px; font-size: 1.1rem;}
+
+    .about-grid, .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+    .project-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+
+    .tech-card {
+      background: var(--surface); padding: 35px; border: 1px solid var(--border);
+      border-radius: 16px; box-shadow: var(--shadow); transition: all 0.3s;
+    }
+    .tech-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px var(--accent-dim); border-color: var(--accent); }
+    .tech-card h3 { font-size: 1.2rem; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px;}
+    .tech-card p { color: var(--muted); font-size: 1.05rem;}
+    .tech-card ul { color: var(--muted); padding-left: 20px; margin-top: 10px; }
+    .tech-card li { margin-bottom: 10px; }
+
+    .pillrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .pill { background: var(--bg); color: var(--accent); padding: 8px 16px; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--border); border-radius: 20px; }
+
+    /* ================= HORIZONTAL CERTIFICATES ================= */
+    .cert-section { position: relative; padding-bottom: 50px; overflow: hidden; }
+    .cert-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 110px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--accent);
+      font-size: 1.5rem; display: grid; place-items: center; cursor: pointer; z-index: 10;
+      transition: all 0.3s; box-shadow: var(--shadow); border-radius: 8px;
+    }
+    .cert-arrow:hover { background: var(--accent); color: #fff; }
+    .arrow-left { left: 10px; }
+    .arrow-right { right: 10px; }
+
+    .cert-track {
+      display: flex; gap: 25px; overflow-x: auto; scroll-snap-type: x mandatory;
+      scroll-behavior: smooth; padding: 20px 80px; -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .cert-track::-webkit-scrollbar { display: none; }
+
+    .cert-card {
+      flex: 0 0 320px; scroll-snap-align: center; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px; padding: 15px;
+      display: flex; flex-direction: column; gap: 15px; box-shadow: var(--shadow);
+      transition: all 0.3s;
+    }
+    .cert-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+    .cert-card h3 { font-size: 0.9rem; color: var(--accent); text-align: center; letter-spacing: 1px; text-transform: uppercase; font-weight: 800; }
+    .cert-preview { width: 100%; height: 200px; object-fit: cover; object-position: top; border-radius: 8px; border: 1px solid #eee; }
+    
+    .cert-actions { display: flex; gap: 10px; margin-top: auto; }
+    .cert-actions a { flex: 1; text-align: center; font-size: 0.8rem; padding: 10px; font-weight: 800; text-transform: uppercase; background: var(--bg); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; transition: all 0.3s; }
+    .cert-actions a:hover { background: var(--accent); color: #fff; }
+    .cert-actions a.download { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    /* ================= RESUME & CONTACT ================= */
+    .resume-band { background: var(--surface); border: 1px solid var(--accent); border-radius: 16px; padding: 40px; display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; box-shadow: var(--shadow); }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; text-align: center; gap: 50px; padding-top: 120px; }
+      .hero .actions { justify-content: center; }
+      .about-grid, .skills-grid, .contact-grid { grid-template-columns: 1fr; }
+      .navlinks { display: none; }
+      .resume-band { flex-direction: column; text-align: center; }
+      .cert-arrow { display: none; }
+      .cert-track { padding: 20px; }
+      .prism-container { transform: scale(0.9); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CONSTELLATION NETWORK CANVAS -->
+  <canvas id="network-canvas"></canvas>
+
+  <header>
+    <div class="wrap">
+      <nav>
+        <a class="brand" href="#home">ISAAC<span>.</span></a>
+        <div class="navlinks">
+          <a href="#about">About</a>
+          <a href="#skills">Skills</a>
+          <a href="#projects">Projects</a>
+          <a href="#profdev">Certificates</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- SPLIT HERO -->
+    <div class="wrap hero" id="home">
+      <div class="hidden-el">
+        <div class="eyebrow">Aspiring IT Support Specialist</div>
+        <h1>Isaac C<br>Olegario</h1>
+        <p>Aspiring IT Support with hands-on experience in a 3-PC home lab workgroup setup. Built PCs from scratch and performs 3 daily troubleshooting routines covering network connectivity, secure file sharing, and system logs.</p>
+        <div class="actions">
+          <a class="btn primary" href="#projects">View My Projects</a>
+          <a class="btn secondary" href="#resume">Download Resume</a>
+        </div>
+      </div>
+      
+      <div class="hidden-el">
+        <!-- 3D PRISM PFP -->
+        <div class="prism-container">
+          <div class="prism-aura"></div>
+          <div class="prism-photo">
+            <!-- ENSURE HIS PHOTO IS NAMED isaac.jpg -->
+            <img src="isaac.jpg" alt="Isaac C Olegario" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <section id="about">
+      <div class="wrap-narrow">
+        <div class="section-head hidden-el">
+          <div class="eyebrow">About Me</div>
+          <h2>Reliable Technical Support.</h2>
+        </div>
+        <div class="about-grid">
+          <article class="tech-card hidden-el">
+            <h3>My Background</h3>
+            <p>Skilled in IT documentation and committed to reliable technical support. I am capable of working independently or as part of a team, always willing to learn new skills and gain practical experience in a professional environment.</p>
+          </article>
+          <article class="tech-card hidden-el">
+            <h3>Education</h3>
+            <p><strong>Northeastern College</strong><br>Bachelor of Science in Information Technology</p>
+            <div class="pillrow">
+              <span class="pill">Tagalog</span>
+              <span class="pill">English</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills">
+      <div class="wrap-narrow">
+        <div class="section-head hidden-el">
+          <div class="eyebrow">Technical Skills</div>
+          <h2>Tools and Strengths</h2>
+        </div>
+        <div class="skills-grid">
+          <article class="tech-card hidden-el">
+            <h3>Networking & OS</h3>
+            <ul>
+              <li>Static IP, Ping Test, File & Printer Sharing</li>
+              <li>Windows Installation & Storage Management (C: / D:)</li>
+              <li>Windows Firewall: Inbound Rules (File Sharing, ICMP)</li>
+              <li>Hardware: Basic Switch / Router identification</li>
+            </ul>
+          </article>
+          <article class="tech-card hidden-el">
+            <h3>Systems & Support</h3>
+            <ul>
+              <li>User Management: Local Users & Groups (lusrmgr.msc)</li>
+              <li>NTFS & Share Permissions</li>
+              <li>Hardware & Software Troubleshooting</li>
+              <li>IT Documentation</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects">
+      <div class="wrap-narrow">
+        <div class="section-head hidden-el">
+          <div class="eyebrow">Hands-On Project</div>
+          <h2>Home Lab Workgroup</h2>
+        </div>
+        <div class="project-grid">
+          <article class="tech-card hidden-el">
+            <h3>Configured File Server with Secured Shared Folders</h3>
+            <ul>
+              <li>Configured file server with secured shared folders (HR_Files)</li>
+              <li>Implemented least privilege: user1 can access, user2 denied (not Everyone)</li>
+              <li>Documented daily troubleshooting tasks</li>
+              <li>Built desktop computers from scratch, installed OS, drivers, and performed hardware diagnostics</li>
+            </ul>
+            <div class="pillrow">
+              <span class="pill">Windows OS</span>
+              <span class="pill">Networking</span>
+              <span class="pill">Hardware</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- HORIZONTAL CERTIFICATES SLIDER -->
+    <section id="profdev" class="cert-section">
+      <div class="wrap">
+        <div class="section-head hidden-el">
+          <div class="eyebrow">Professional Development</div>
+          <h2>Certificates</h2>
+          <p>Use the arrows or swipe to browse.</p>
+        </div>
+      </div>
+
+      <button class="cert-arrow arrow-left" id="cert-left">&#10094;</button>
+      <button class="cert-arrow arrow-right" id="cert-right">&#10095;</button>
+
+      <div class="cert-track" id="cert-track">
+        
+        <article class="cert-card hidden-el">
+          <h3>Certificate Title 1</h3>
+          <a href="cert1.jpg" target="_blank"><img class="cert-preview" src="cert1.jpg" alt="Certificate 1" /></a>
+          <div class="cert-actions"><a href="cert1.jpg" target="_blank">View</a><a href="cert1.jpg" download="Certificate-1.jpg" class="download">Save</a></div>
+        </article>
+
+        <article class="cert-card hidden-el">
+          <h3>Certificate Title 2</h3>
+          <a href="cert2.jpg" target="_blank"><img class="cert-preview" src="cert2.jpg" alt="Certificate 2" /></a>
+          <div class="cert-actions"><a href="cert2.jpg" target="_blank">View</a><a href="cert2.jpg" download="Certificate-2.jpg" class="download">Save</a></div>
+        </article>
+
+        <article class="cert-card hidden-el">
+          <h3>Certificate Title 3</h3>
+          <a href="cert3.jpg" target="_blank"><img class="cert-preview" src="cert3.jpg" alt="Certificate 3" /></a>
+          <div class="cert-actions"><a href="cert3.jpg" target="_blank">View</a><a href="cert3.jpg" download="Certificate-3.jpg" class="download">Save</a></div>
+        </article>
+
+        <article class="cert-card hidden-el">
+          <h3>Certificate Title 4</h3>
+          <a href="cert4.jpg" target="_blank"><img class="cert-preview" src="cert4.jpg" alt="Certificate 4" /></a>
+          <div class="cert-actions"><a href="cert4.jpg" target="_blank">View</a><a href="cert4.jpg" download="Certificate-4.jpg" class="download">Save</a></div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- RESUME DOWNLOAD -->
+    <section id="resume">
+      <div class="wrap-narrow">
+        <div class="resume-band hidden-el">
+          <div>
+            <h2>Download my resume</h2>
+            <p>My resume is available for viewing and download.</p>
+          </div>
+          <a class="btn primary" href="resume.pdf" download="Isaac-Olegario-Resume.pdf">Download Resume</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact">
+      <div class="wrap-narrow">
+        <div class="section-head hidden-el">
+          <div class="eyebrow">Contact</div>
+          <h2>Let's connect.</h2>
+        </div>
+        <div class="contact-grid">
+          <article class="tech-card hidden-el">
+            <h3>Contact Information</h3>
+            <p>Email: <a href="mailto:olegarioisaac856@gmail.com" style="color:var(--accent); font-weight: bold;">olegarioisaac856@gmail.com</a></p>
+            <p style="margin-top: 10px;">Phone: <a href="tel:+639533773186" style="color:var(--accent); font-weight: bold;">0953 377 3186</a></p>
+            <p style="margin-top: 10px;">Address: Santiago City, Isabela</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer style="text-align:center; padding: 40px 0; border-top: 1px solid var(--border); color: var(--muted);">
+    <div class="wrap">
+      <p>© 2026 Isaac C Olegario. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ================= JAVASCRIPT ================= -->
+  <script>
+    // 1. Scroll Reveal Animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('show-el'); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.hidden-el').forEach((el) => observer.observe(el));
+
+    // 2. Interactive Network Constellation Background
+    const canvas = document.getElementById('network-canvas');
+    const ctx = canvas.getContext('2d');
+    let particlesArray;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let mouse = { x: null, y: null, radius: 150 };
+    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+    class Particle {
+      constructor(x, y, directionX, directionY, size) {
+        this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size;
+      }
+      draw() {
+        ctx.beginPath(); 
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); 
+        ctx.fillStyle = 'rgba(255, 77, 148, 0.5)'; 
+        ctx.fill();
+      }
+      update() {
+        if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+        if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+        let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < mouse.radius + this.size) {
+          if (mouse.x < this.x && this.x < canvas.width - this.size * 10) this.x += 2;
+          if (mouse.x > this.x && this.x > this.size * 10) this.x -= 2;
+          if (mouse.y < this.y && this.y < canvas.height - this.size * 10) this.y += 2;
+          if (mouse.y > this.y && this.y > this.size * 10) this.y -= 2;
+        }
+        this.x += this.directionX; this.y += this.directionY; this.draw();
+      }
+    }
+
+    function init() {
+      particlesArray = [];
+      let numberOfParticles = (canvas.height * canvas.width) / 10000;
+      for (let i = 0; i < numberOfParticles; i++) {
+        let size = (Math.random() * 2) + 1;
+        let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+        let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+        let directionX = (Math.random() * 1) - 0.5;
+        let directionY = (Math.random() * 1) - 0.5;
+        particlesArray.push(new Particle(x, y, directionX, directionY, size));
+      }
+    }
+
+    // Draw lines between particles
+    function connect() {
+      let opacityValue = 1;
+      for (let a = 0; a < particlesArray.length; a++) {
+        for (let b = a; b < particlesArray.length; b++) {
+          let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) 
+                       + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+          
+          if (distance < (canvas.width / 10) * (canvas.height / 10)) {
+            opacityValue = 1 - (distance / 20000);
+            ctx.strokeStyle = 'rgba(255, 77, 148, ' + opacityValue + ')';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); }
+      connect();
+    }
+
+    init(); animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = innerWidth; canvas.height = innerHeight; init();
+    });
+
+    // 3. Horizontal Certificate Slider Logic
+    const track = document.getElementById('cert-track');
+    const btnLeft = document.getElementById('cert-left');
+    const btnRight = document.getElementById('cert-right');
+
+    if (track && btnLeft && btnRight) {
+      const scrollAmount = 345; 
+      btnLeft.addEventListener('click', () => { track.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); });
+      btnRight.addEventListener('click', () => { track.scrollBy({ left: scrollAmount, behavior: 'smooth' }); });
+    }
+  </script>
+
+</body>
+</html>
